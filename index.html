@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل إنجاز دورة - المعلمين</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background: #f4f6f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h2 { color: #1e5f74; margin-bottom: 20px; }
+        label { display: block; text-align: right; margin-bottom: 5px; font-size: 14px; font-weight: bold; color: #555; }
+        select, input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Tajawal'; box-sizing: border-box; outline: none; transition: 0.3s; background: #fff; }
+        select:focus, input:focus { border-color: #1e5f74; box-shadow: 0 0 5px rgba(30,95,116,0.2); }
+        button { width: 100%; padding: 12px; background: #1e5f74; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 5px; }
+        button:hover { background: #164656; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .msg { display: none; margin-top: 15px; padding: 10px; border-radius: 5px; font-size: 13px; line-height: 1.6; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>تسجيل إنجاز دورة</h2>
+    <p style="font-size:13px; color:#666;">فضلاً، اختر الدورة أولاً لتظهر لك قائمة الأسماء</p>
+
+    <label>اختر البرنامج التدريبي:</label>
+    <select id="courseSelect">
+        <option value="" disabled selected>-- اضغط هنا لاختيار الدورة --</option>
+        <option value="0">التخطيط للتدريس (معلمون)</option>
+        <option value="1">التدريس الفعال (معلمون)</option>
+        <option value="2">إدارة البيئة الصفية (معلمون)</option>
+        <option value="3">التقويم من أجل التعلم (معلمون)</option>
+        <option value="4">إدارة الأداء الوظيفي (إداريون)</option>
+        <option value="5">تعزيز الأساليب (عربي)</option>
+        <option value="6">تعزيز الأساليب (علوم)</option>
+        <option value="7">تعزيز الأساليب (رياضيات)</option>
+        <option value="8">برامج التوجيه الطلابي (الموجه)</option>
+    </select>
+
+    <label>اسم المنفذ:</label>
+    <select id="tName">
+        <option value="" disabled selected>-- اختر الدورة أولاً --</option>
+    </select>
+
+    <label>رابط الشاهد / الشهادة:</label>
+    <input type="url" id="tLink" placeholder="https://..." required>
+    
+    <button id="btnSubmit">📤 إرسال البيانات</button>
+    <div id="msgBox" class="msg"></div>
+</div>
+
+<script>
+    (function() {
+        // بيانات الأسماء
+        var staffData = {
+            teachers: [
+                "أحمد إبراهيم علي آل صيود عسيري", "أحمد بن سعيد بن علي عسيري", "أحمد علي حسن آل ذياب",
+                "أحمد علي محمد آل المعيد", "أحمد قناعي أحمد عسيري", "أحمد محمد مسفر المجنب عسيري",
+                "بلغيث محمد بلغيث الخالدي", "جابر أحمد علي آل مقاضمة عسيري", "جمال علي مفرح الشهري",
+                "حسن يحيى حسن الشهري", "خالد علي عبدالله الشهري", "سالم حسن عوض الشهري",
+                "عادل صالح جريبيع الزهراني", "عامر أحمد محمد الشهري", "عامر حسن أحمد عسيري",
+                "عامر عبدالله علي الشهري", "علي إبراهيم محمد عسيري", "علي بن أحمد بن علي الشهري",
+                "علي شبيلي حسن آل صفوان الشهري", "علي محمد علي الشيخي عسيري", "علي محمد يحيى حكمي",
+                "علي هاشم محمد الهاشمي", "عوض أحمد الشهري", "عيسى يحيى سعيد عسيري",
+                "فهد بن نواف بن محمد الزياني الشهري", "محمد حسن جابر الخلفي", "محمد علي عامر المحفوظي الأسمري",
+                "محمد علي محمد آل معنتر عسيري", "محمد ناصر محمد آل محمد الأسمري", "محمد هيازع مانع الشهري",
+                "مدهش عوض مدهش الفقيه", "يحيى محمد مانع الشهري"
+            ],
+            admins: [
+                "محمد أحمد علي الشهري", "حسن علي محمد الشهري", 
+                "محمد جابر أحمد عسيري", "حسن معدي عسيري"
+            ],
+            counselor: ["جمال علي مفرح الشهري"],
+            
+            arabic: [
+                "أحمد إبراهيم علي آل صيود عسيري", "سالم حسن عوض الشهري",
+                "علي محمد علي الشيخي عسيري", "عوض أحمد محمد الشهري",
+                "محمد ناصر محمد آل محمد الأسمري"
+            ],
+            science: [
+                "أحمد بن سعيد بن علي عسيري", "عادل صالح جريبيع الزهراني",
+                "محمد حسن جابر الخلفي", "محمد علي محمد آل معنتر عسيري"
+            ],
+            math: [
+                "بلغيث محمد بلغيث الخالدي", "خالد علي عبدالله الشهري",
+                "عامر أحمد محمد الشهري", "فهد بن نواف بن محمد الزياني الشهري",
+                "محمد علي عامر المحفوظي الأسمري"
+            ]
+        };
+
+        var courseSelect = document.getElementById('courseSelect');
+        var nameSelect = document.getElementById('tName');
+
+        // دالة التحديث
+        function updateNames() {
+            var val = courseSelect.value;
+            if(!val && val !== "0") return; // إذا لم يختر شيئاً
+            
+            var idx = parseInt(val);
+            var list = [];
+
+            if (idx === 4) list = staffData.admins;
+            else if (idx === 8) list = staffData.counselor;
+            else if (idx === 5) list = staffData.arabic;
+            else if (idx === 6) list = staffData.science;
+            else if (idx === 7) list = staffData.math;
+            else list = staffData.teachers;
+
+            // تفريغ القائمة
+            nameSelect.innerHTML = '<option value="" disabled selected>-- اختر اسمك --</option>';
+
+            if(list && list.length > 0) {
+                list.sort(function(a, b){ return a.localeCompare(b, 'ar'); });
+                for(var i=0; i<list.length; i++) {
+                    var opt = document.createElement('option');
+                    opt.value = list[i];
+                    opt.text = list[i];
+                    nameSelect.appendChild(opt);
+                }
+            } else {
+                var opt = document.createElement('option');
+                opt.text = "(لا توجد أسماء)";
+                nameSelect.appendChild(opt);
+            }
+        }
+
+        // ربط الحدث
+        courseSelect.addEventListener('change', updateNames);
+    })();
+</script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqG4A1sx02N1HNR0bqUHMh7EUGEK1vvxU",
+      authDomain: "my-report-e8538.firebaseapp.com",
+      databaseURL: "https://my-report-e8538-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "my-report-e8538",
+      storageBucket: "my-report-e8538.firebasestorage.app",
+      messagingSenderId: "1058251518699",
+      appId: "1:1058251518699:web:8a3d68d4c69de53a5d84ae"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    function isValidHttpUrl(string) {
+        let url;
+        try { url = new URL(string); } catch (_) { return false; }
+        return url.protocol === "http:" || url.protocol === "https:";
+    }
+
+    document.getElementById('btnSubmit').addEventListener('click', function() {
+        const btn = document.getElementById('btnSubmit');
+        const nameSelect = document.getElementById('tName');
+        const courseSelect = document.getElementById('courseSelect');
+        const msgBox = document.getElementById('msgBox');
+        
+        const name = nameSelect.value;
+        const link = document.getElementById('tLink').value.trim();
+        const courseIdx = courseSelect.value;
+
+        // التحقق من اختيار الدورة
+        if (!courseIdx && courseIdx !== "0") {
+            showMsg("❌ فضلاً اختر الدورة أولاً.", "error");
+            return;
+        }
+
+        // التحقق من اختيار الاسم
+        if (!name || name === "") {
+            showMsg("❌ فضلاً اختر اسمك من القائمة.", "error");
+            return;
+        }
+
+        if (!isValidHttpUrl(link)) {
+            showMsg("❌ الرابط غير صحيح! يجب أن يبدأ بـ https://", "error");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = "⏳ جاري الإرسال...";
+        msgBox.style.display = 'none';
+
+        push(ref(db, `Ali_Training_Data/${courseIdx}`), {
+            n: name,
+            link: link,
+            s: 2, 
+            r: "تم الإرسال ذاتياً",
+            timestamp: new Date().toISOString()
+        })
+        .then(() => {
+            showMsg("✅ تم الإرسال بنجاح!", "success");
+            document.getElementById('tLink').value = "";
+            btn.innerHTML = "📤 إرسال بيانات أخرى";
+            btn.disabled = false;
+        })
+        .catch((error) => {
+            showMsg("❌ حدث خطأ: " + error.message, "error");
+            btn.disabled = false;
+            btn.innerHTML = "📤 إرسال البيانات";
+        });
+    });
+
+    function showMsg(text, type) {
+        const box = document.getElementById('msgBox');
+        box.innerHTML = text;
+        box.className = "msg " + type;
+        box.style.display = "block";
+    }
+</script>
+
+</body>
+</html>
