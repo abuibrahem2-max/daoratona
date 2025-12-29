@@ -102,7 +102,10 @@
             var idx = parseInt(val);
             var list = [];
 
-            if (idx === 4) list = staffData.admins;
+            // المنطق الجديد: الدورة 4 تجمع المعلمين والإداريين
+            if (idx === 4) {
+                list = staffData.admins.concat(staffData.teachers);
+            } 
             else if (idx === 8) list = staffData.counselor;
             else if (idx === 5) list = staffData.arabic;
             else if (idx === 6) list = staffData.science;
@@ -113,11 +116,14 @@
             nameSelect.innerHTML = '<option value="" disabled selected>-- اختر اسمك --</option>';
 
             if(list && list.length > 0) {
-                list.sort(function(a, b){ return a.localeCompare(b, 'ar'); });
-                for(var i=0; i<list.length; i++) {
+                // إزالة التكرار (للاحتياط) ثم الترتيب
+                var uniqueList = [...new Set(list)];
+                uniqueList.sort(function(a, b){ return a.localeCompare(b, 'ar'); });
+                
+                for(var i=0; i<uniqueList.length; i++) {
                     var opt = document.createElement('option');
-                    opt.value = list[i];
-                    opt.text = list[i];
+                    opt.value = uniqueList[i];
+                    opt.text = uniqueList[i];
                     nameSelect.appendChild(opt);
                 }
             } else {
@@ -165,13 +171,11 @@
         const link = document.getElementById('tLink').value.trim();
         const courseIdx = courseSelect.value;
 
-        // التحقق من اختيار الدورة
         if (!courseIdx && courseIdx !== "0") {
             showMsg("❌ فضلاً اختر الدورة أولاً.", "error");
             return;
         }
 
-        // التحقق من اختيار الاسم
         if (!name || name === "") {
             showMsg("❌ فضلاً اختر اسمك من القائمة.", "error");
             return;
@@ -215,5 +219,4 @@
 </script>
 
 </body>
-
 </html>
